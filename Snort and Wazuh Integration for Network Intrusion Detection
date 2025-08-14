@@ -1,0 +1,80 @@
+# Detecting Network Attacks Using Snort 3 Integrated with Wazuh SIEM
+
+## Objective
+This project demonstrates how to integrate **Snort 3 IDS** with **Wazuh SIEM** to detect and forward alerts in real time.  
+By simulating ICMP pings and TCP port scans from a host machine, Snort was configured to generate alerts, which were then ingested into the Wazuh dashboard for centralized monitoring.
+
+---
+
+## Skills Learned
+- Installation and configuration of Snort 3 with custom detection rules.
+- Integration of Snort alerts into Wazuh for centralized SIEM monitoring.
+- Simulation of network attacks (ICMP pings and TCP port scans) for detection testing.
+- Parsing and verification of real-time alerts in the Wazuh dashboard.
+- Hands-on experience in IDS rule creation, log forwarding, and SIEM alert correlation.
+
+---
+
+## Tools Used
+- **Snort 3** – Open-source IDS for detecting malicious network traffic.
+- **Wazuh OVA** – SIEM platform for monitoring, alerting, and correlation.
+- **Ubuntu VM** – Host for Snort 3 and Wazuh agent.
+- **Linux Host Machine** – Used for generating attack traffic (ICMP & Nmap scans).
+- **Nmap** – Network scanning tool for port scan simulation.
+
+---
+
+## Environment Setup
+- **Ubuntu VM** with Snort 3 installed and configured.
+- **Wazuh OVA** deployed as the SIEM server.
+- **Host Linux Machine** for simulating attacks.
+- **Wazuh Agent** installed on Ubuntu VM for log forwarding.
+
+---
+
+### Steps
+
+Step 1: I Installed and Configured Snort 3 on Ubuntu with the required dependencies. I verified the installation using: sudo snort -V
+
+![image] 
+
+Next, I configured Snort to detect attacks by editing the /usr/local/etc/rules/local.rules file and added the rule bellow. This rule triggers an alert whenever any ICMP packet (e.g. ping) or TCP SYN packets, often used in port scans (like from nmap)is seen
+alert icmp any any -> any any (msg:"ICMP Ping Detected"; sid:1000001;)
+alert tcp any any -> any any (flags:S; msg:"Port scan attempt"; sid:1000002;)
+
+![image]
+
+Step 2 . I configured my ubuntu as a Wazuh Agent
+
+![image]
+
+I restarted wazuh And ensured it was showing as active on my wazuh dashboard
+
+![image]
+![image]
+
+Step 3: I Ran Snort with the appropriate command sudo snort -c /usr/local/etc/snort/snort.lua -R /usr/local/etc/rules/local.rules -i enp0s3 and ensured it was actively running and listening
+
+![image]
+![image]
+
+Step 4: I launched Port Scan and ICMP Pings. From my host linux machine, I pinged my ubuntu machine and ran an nmap scan. 
+
+![image]
+
+Snort successfully detected the traffic and logged it to: alert_fast.txt
+
+![image]
+
+Step 5: Next, I configured the wazuh agent on ubuntu to receive the logs by editing the ossec.conf file and restarted my wazuh agent
+
+![image]
+
+Step 6: I verified that the Snort Logs reached the Wazuh dashboard
+
+![image]
+![image]
+
+# Conclusion
+This project demonstrated how Snort 3 can be integrated with Wazuh SIEM to detect and monitor network attacks in real time. The custom rules successfully identified ICMP pings and TCP port scans, with alerts forwarded to the Wazuh dashboard.
+
